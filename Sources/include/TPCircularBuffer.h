@@ -43,34 +43,26 @@
 #define TPCircularBuffer_h
 
 #include <stdbool.h>
+#include <stdint.h>
 #include <string.h>
 #include <assert.h>
 
 #ifdef __cplusplus
-    extern "C++" {
-        #include <atomic>
-        typedef std::atomic_uint32_t atomicUInt32;
-        #define atomicFetchAdd(a,b) std::atomic_fetch_add(a,b)
-        #define atomicFetchSub(a,b) std::atomic_fetch_sub(a,b)
-    }
-#else
-    #include <stdatomic.h>
-    typedef atomic_uint_fast32_t atomicUInt32;
-    #define atomicFetchAdd(a,b) atomic_fetch_add(a,b)
-    #define atomicFetchSub(a,b) atomic_fetch_sub(a,b)
-#endif
-
-#ifdef __cplusplus
 extern "C" {
 #endif
-    
+
+// Remove atomics entirely
+typedef uint32_t atomicUInt32;
+#define atomicFetchAdd(a,b) (*(a) += (b))
+#define atomicFetchSub(a,b) (*(a) -= (b))
+
 typedef struct {
-    void                 *buffer;
-    uint32_t              length;
-    uint32_t              tail;
-    uint32_t              head;
-    volatile atomicUInt32 fillCount;
-    bool                  atomic;
+    void      *buffer;
+    uint32_t   length;
+    uint32_t   tail;
+    uint32_t   head;
+    atomicUInt32 fillCount; // now plain uint32_t
+    bool atomic;
 } TPCircularBuffer;
 
 /*!
